@@ -1,0 +1,57 @@
+int	xini=0.0; int	xfin=10.0; int yini=-5.0; int yfin=5.0;
+real haxis1 = 0.5;
+real vaxis1 = 1.0;
+real xcenter1 = (xfin/2.0);
+real angle1 = 0.1*pi/180.0;
+//real distance = xcenter2-xcenter1;
+real distance = xfin;
+border a1(t=xini,xfin){x=t;y=yini;label=901;};
+border a2(t=yini,yfin){x=xfin;y=t;label=902;};
+border a3(t=xini,xfin){x=xfin-t;y=yfin;label=903;};
+border a4(t=yini,yfin){x=xini;y=-t;label=904;};
+border C0(t=0,2*pi){x=xcenter1 + haxis1*cos(t)*cos(angle1) -vaxis1*sin(t)*sin(angle1); y=0.0+haxis1*cos(t)*sin(angle1) +vaxis1*sin(t)*cos(angle1);label=0;};
+mesh Th0=buildmesh(C0(30));
+real vol;
+vol= int2d(Th0)(1.0);
+mesh Th=buildmesh(a1(30)+a2(30)+a3(30)+a4(30)+C0(-30));
+//plot(Th);
+fespace V(Th, P1, periodic=[[901,x],[903,x],[902,y],[904,y]]);
+  V u, u1, u2, v, hx, hy, omega, phi;
+real[int,int] M(1,6); // M(no_particles, no_attributes) | attributes: 0_label, 1_mx, 2_my, 3_, 4_particle_volume, 5_
+M= 0.0;
+real[int,int] D(2,2);
+D= 0.0;
+real[int,int] DM(1,2);
+DM= 0.0;
+real mtheta = 1.0*pi/180.0; //from positive horizontal axis, and counterclock-wise
+M(0,1)=cos(mtheta);
+M(0,2)=sin(mtheta);
+D(0,0)= 1.0;
+D(0,1)= 0.0;
+D(1,0)= 0.0;
+D(1,1)= 0.0;
+DM(0,0)= D(0,0)*M(0,1);
+DM(0,1)= D(1,1)*M(0,2);
+real[int,int] G(1,2);
+G(0,0)= DM(0,0) -M(0,1) -(-0.3);
+G(0,1)= DM(0,1) -M(0,2) -(-0.6);
+//cout << G(0,0) << "\t" << G(0,1) << endl;
+ofstream outfile( "tester01.dat" );
+solve Laplace(u,v)=
+    int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v) )
+    +int1d(Th,0)( ([G(0,0),G(0,1)]'*[N.x,N.y])*v);
+//hx = dx(u);
+//hy = dy(u);
+//hex=hext[0];
+//hey=hext[1];
+plot(Th, u, value=1, fill=1, wait=1);
+cout << u << endl;
+solve Cell(omega,phi)= 
+    int2d(Th,0)( dx(omega)*dx(phi) +dy(omega)*dy(phi) ) 
+    +int1d(Th,0)( ([G(0,0),G(0,1)]'*[N.x,N.y])*phi );
+plot(Th, omega, value=1, fill=1, wait=1);
+u1= omega*G(0,0) +omega*G(0,1);
+real cellvol;
+cellvol= int2d(Th,0)( dy(omega) );
+real Hdmg;
+Hdmg= (1.0)/(vol +cellvol)*dx( DM(0,0)*M(0,1) +DM(0,1)*M(0,2) );

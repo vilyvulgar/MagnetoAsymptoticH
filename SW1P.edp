@@ -1,0 +1,35 @@
+int	x0=0.0; int	xf=10.0; int yi=-5.0; int yf=5.0;
+real al = (10*pi/180.);
+real al2=(45*pi/180.);
+real al3=(20*pi/180.);
+real an = (90.0 -(al*180.0/pi)); //Recordatorio ángulo entre eje fácil y hext
+real sap = 0.8;
+real sam = 0.4;
+border a1(t=x0,xf){x=t;y=yi;label=901;};
+border a2(t=yi,yf){x=xf;y=t;label=902;};
+border a3(t=x0,xf){x=xf-t;y=yf;label=903;};
+border a4(t=yi,yf){x=x0;y=-t;label=904;};
+real r1=0.5;
+real r2=0.5;
+border C0(t=0,2.*pi){x =5.0 +(r1)*cos(t); y = 0.0 +(r2)*sin(t); label=0;};
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+mesh Th=buildmesh(a1(30)+a2(30)+a3(30)+a4(30)+C0(-30));
+//plot(Th,wait=1);
+
+verbosity =0;
+real[int] m00 =[0.0,1.0];
+fespace Vh(Th,P1);
+//fespace Vh(Th, P1, periodic= [[1,x],[3,x],[2,y],[4,y]] );
+Vh uh,vh,hx,hy,hex,hey;
+solve Problem(uh,vh)=
+int2d(Th)(dx(uh)*dx(vh) + dy(uh)*dy(vh) )
+-int1d(Th,0)( -([m00[0],m00[1]]'*[N.x,N.y])*vh);
+plot(uh,value=true,fill=1,wait=0);
+
+
+
+
+
