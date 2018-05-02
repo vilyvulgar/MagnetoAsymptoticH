@@ -1,8 +1,8 @@
 int	xini=0.0; int	xfin=10.0; int yini=-5.0; int yfin=5.0; // x and y dimensions of the cell
-real haxis1 = 0.5; // horizontal axis of the ellipsoidal particle
+real haxis1 = 1.5; // horizontal axis of the ellipsoidal particle
 real vaxis1 = 1.0; // vertical axis of the ellipsoidal particle
 real xcenter1 = (xfin/2.0);
-real angle1 = 0.1*pi/180.0;
+real angle1 = 0.01*pi/180.0;
 real distance = xfin;
 // Defining the bounding box
 border a1(t=xini,xfin){x=t;y=yini;label=901;}; 
@@ -26,7 +26,7 @@ mesh Th0=buildmesh(C0(30));
 vol= int2d(Th0)(1.0);
 
 mesh Th=buildmesh(a1(30)+a2(30)+a3(30)+a4(30)+C0(-30));
-//plot(Th);
+plot(Th);
 fespace V(Th, P1, periodic=[[901,x],[903,x],[902,y],[904,y]]);
   V ui, vi, ue, ve, w, phi, hx, hy;
 
@@ -62,8 +62,8 @@ solve Exterior(ue,ve)=
 // nu.nabla(w) = ei.nu
 solve Cell(w,phi)=
     int2d(Th)( dx(w)*dx(phi) +dy(w)*dy(phi) )
-    +int1d(Th,0)( ([x,y]'*[N.x,N.y] )*phi);
-//plot(Th, w, value=1, fill=1, wait=1); null results for w
+    +int1d(Th,0)( ([0.,1.]'*[N.x,N.y] )*phi);
+plot(Th, w, value=1, fill=1, wait=1); //null results for w
 hx = dx(ue);
 hy = dy(ue);
 cellvol= int2d(Th0)( dy(w) );
