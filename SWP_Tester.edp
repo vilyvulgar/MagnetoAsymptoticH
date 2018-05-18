@@ -28,7 +28,7 @@ vol= int2d(Th0)(1.0);
 mesh Th=buildmesh(a1(30)+a2(30)+a3(30)+a4(30)+C0(-30));
 plot(Th);
 fespace V(Th, P1, periodic=[[901,x],[903,x],[902,y],[904,y]]);
-  V ui, vi, ue, ve, w, phi, hx, hy;
+  V ui, vi, ue, ve, w1, w2, phi1, phi2, hx, hy;
 
 // Initialization of variables
 M(0,1)=cos(mtheta);
@@ -60,11 +60,16 @@ solve Exterior(ue,ve)=
 // Solution of the Cell problem
 // -Laplace(w) = 0 in Y 
 // nu.nabla(w) = ei.nu
-solve Cell(w,phi)=
-    int2d(Th)( dx(w)*dx(phi) +dy(w)*dy(phi) )
-    +int1d(Th,0)( ([0.,1.]'*[N.x,N.y] )*phi);
-plot(Th, w, value=1, fill=1, wait=1); //null results for w
-hx = dx(ue);
-hy = dy(ue);
-cellvol= int2d(Th0)( dy(w) );
+solve Cell1(w1,phi1)=
+    int2d(Th)( dx(w1)*dx(phi1) +dy(w1)*dy(phi1) )
+    +int1d(Th,0)( ([1.,0.]'*[N.x,N.y] )*phi1);
+plot(Th, w1, value=1, fill=1, wait=1);
+
+solve Cell2(w2,phi2)=
+    int2d(Th)( dx(w2)*dx(phi2) +dy(w2)*dy(phi2) )
+    +int1d(Th,0)( ([0.,1.]'*[N.x,N.y] )*phi2);
+plot(Th, w2, value=1, fill=1, wait=1);
+//hx = dx(ue);
+//hy = dy(ue);
+cellvol= int2d(Th0)( dy(w1) );
 cout << cellvol << endl;
